@@ -238,3 +238,10 @@ flowchart LR
 | Add API endpoints | `web_server.py` |
 
 </div>
+
+___
+<div align="center">
+  
+<a href="https://madebyhuman.iamjarl.com"><img src="https://madebyhuman.iamjarl.com/badges/co-created-black.svg" alt="Co-created with AI" width="200" height="120"></a>
+
+</div>
