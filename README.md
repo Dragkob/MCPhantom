@@ -7,7 +7,7 @@ ___
 ___
 
 > [!WARNING]
-> MCPhantom is an extensible security auditing framework; not a turnkey, universal scanner. It provides a solid foundation for MCP focused reconnaissance and vulnerability testing, but it is intentionally designed as a starting skeleton that you are expected to adapt to your targets, environments, and methodology.
+> MCPhantom is an extensible security auditing framework; not a turnkey, universal scanner. It provides a solid foundation for MCP focused reconnaissance and vulnerability testing, but it is intentionally designed as a <ins><b>starting skeleton</b></ins> that you are expected to adapt to your targets, environments, and methodology.
 > - Not guaranteed to work out of the box on every MCP server : Capabilities, schemas, transports, and response formats vary widely across implementations. Classification, payload delivery, and proof detection may need tuning per target.
 > - Payload coverage is deliberately limited : MCPhantom includes representative probes for classes such as SQL injection, command injection, SSRF, path traversal, IDOR, and information disclosure, but it does **not** ship exhaustive wordlists or engine scale fuzzing comparable to tools like sqlmap, Burp Intruder, or commercial DAST platforms.
 > - Proof heuristics are best-effort : Findings are scored from response signals (errors, data leaks, version strings, reflected output, etc.). False positives and false negatives are possible without target-specific customization. **This is exactly why the framework also allows you to do manual auditing.**
