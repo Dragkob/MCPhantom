@@ -2,7 +2,7 @@
 
 ___
 
-**MCPhantom** is a local web dashboard for MCP endpoint reconnaissance and exploitation. Point it at any MCP URL, discover exposed resources, templates, tools, and prompts, then interact with them from a clean security console UI. Runs locally at 127.0.0.1:1337; no cloud, no setup beyond Python.
+**MCPhantom** is a local web dashboard for MCP endpoint reconnaissance and exploitation. Point it at any MCP URL, discover exposed resources, templates, tools, and prompts, then interact with them from a clean security console UI. Runs locally at 127.0.0.1:1337; no cloud, no setup beyond Python. Project's Documentation can be found [here](https://github.com/Dragkob/MCPhantom/blob/main/DOCUMENTATION.md).
 
 ___
 
