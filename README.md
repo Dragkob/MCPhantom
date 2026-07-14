@@ -12,6 +12,7 @@ ___
 > - Payload coverage is deliberately limited : MCPhantom includes representative probes for classes such as SQL injection, command injection, SSRF, path traversal, IDOR, and information disclosure, but it does **not** ship exhaustive wordlists or engine scale fuzzing comparable to tools like sqlmap, Burp Intruder, or commercial DAST platforms.
 > - Proof heuristics are best-effort : Findings are scored from response signals (errors, data leaks, version strings, reflected output, etc.). False positives and false negatives are possible without target-specific customization. **This is exactly why the framework also allows you to do manual auditing.**
 > - You are encouraged to extend it : The project is open source so you can grow payload libraries, add plugins, refine classifiers, integrate with your CI/CD pipeline, or harden detection logic for your use cases.
+> - The AutoPwn feature is a WIP and it is highly discouraged to use it in live production encironments. Only use this feature on CTFs and/or local labs.
 
 ___
 
