@@ -1,0 +1,1824 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MCPhantom</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png" />
+  <link rel="icon" type="image/png" sizes="48x48" href="/favicon.png?size=48" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon.png?size=180" />
+  <style>
+    :root {
+      --bg: #111316;
+      --panel: #181b20;
+      --panel-2: #14171b;
+      --panel-border: rgba(148, 155, 164, 0.16);
+      --panel-border-strong: rgba(148, 155, 164, 0.30);
+      --text: #e8eaed;
+      --muted: #8b939e;
+      --accent: #2f7ec8;
+      --accent-strong: #3d9ae8;
+      --accent-ink: #ffffff;
+      --steel: #6b7785;
+      --gold: #a89468;
+      --danger: #c97070;
+      --shadow: 0 2px 10px rgba(0, 0, 0, 0.22);
+      --radius: 10px;
+      --radius-sm: 8px;
+    }
+    [data-theme="light"] {
+      --bg: #eef2f6;
+      --panel: rgba(255, 255, 255, 0.92);
+      --panel-2: rgba(248, 250, 253, 0.98);
+      --panel-border: rgba(64, 78, 92, 0.12);
+      --panel-border-strong: rgba(76, 147, 206, 0.20);
+      --text: #17222c;
+      --muted: #5c6876;
+      --accent: #4b93ce;
+      --accent-strong: #6fb4ea;
+      --accent-ink: #f7fbff;
+      --steel: #5c6f82;
+      --gold: #9b7a35;
+      --danger: #b84e4e;
+      --shadow: 0 20px 56px rgba(21, 33, 45, 0.10);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--text);
+      background: var(--bg);
+      min-height: 100vh;
+      overflow-x: hidden;
+      position: relative;
+      transition: background 200ms ease, color 200ms ease;
+    }
+    [data-theme="light"] body {
+      background:
+        radial-gradient(circle at 18% 14%, rgba(111, 180, 234, 0.10), transparent 24%),
+        radial-gradient(circle at 82% 12%, rgba(111, 191, 159, 0.08), transparent 18%),
+        radial-gradient(circle at 82% 78%, rgba(200, 174, 115, 0.05), transparent 18%),
+        linear-gradient(180deg, #f7f9fc 0%, var(--bg) 46%, #e5eaf0 100%);
+    }
+    body::before,
+    body::after {
+      display: none;
+    }
+    .wrap {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 28px;
+      position: relative;
+      z-index: 1;
+    }
+    .topbar {
+      position: relative;
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 20px;
+      margin-bottom: 18px;
+      border-radius: var(--radius);
+      background: var(--panel);
+      border: 1px solid var(--panel-border);
+      box-shadow: none;
+      overflow: hidden;
+    }
+    [data-theme="light"] .topbar {
+      background: rgba(255, 255, 255, 0.84);
+    }
+    .brand {
+      grid-column: 2;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 48px;
+      line-height: 0;
+      pointer-events: none;
+    }
+    .topbar-credit {
+      grid-column: 3;
+      justify-self: end;
+      font-size: 13px;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+    .topbar-credit a {
+      color: var(--accent-strong);
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .topbar-credit a:hover {
+      text-decoration: underline;
+    }
+    .brand-mark {
+      width: 206px;
+      height: 48px;
+      object-fit: contain;
+      object-position: center center;
+      display: block;
+      transform: scale(2.1);
+      transform-origin: center center;
+      border-radius: 0;
+      padding: 0;
+      background: transparent;
+      border: 0;
+      filter: drop-shadow(0 2px 10px rgba(0, 0, 0, 0.18));
+    }
+    [data-theme="light"] .brand-mark {
+      filter: saturate(1.08) contrast(1.08) drop-shadow(0 2px 8px rgba(0, 0, 0, 0.08));
+    }
+    .nav-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+    .icon-link, .icon-btn {
+      height: 38px;
+      min-width: 38px;
+      padding: 0 12px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--panel-border);
+      background: var(--panel-2);
+      color: var(--text);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      cursor: pointer;
+      transition: border-color 160ms ease, background 160ms ease;
+    }
+    .icon-link:hover, .icon-btn:hover {
+      border-color: var(--panel-border-strong);
+    }
+    .corner-fab {
+      position: fixed;
+      bottom: 24px;
+      z-index: 100;
+      width: 48px;
+      height: 48px;
+      border-radius: 999px;
+      border: 1px solid var(--panel-border);
+      background: var(--panel);
+      color: var(--text);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: var(--shadow);
+      transition: border-color 160ms ease, background 160ms ease;
+      text-decoration: none;
+    }
+    .corner-fab:hover {
+      border-color: var(--panel-border-strong);
+    }
+    .theme-fab {
+      right: 24px;
+    }
+    .github-fab {
+      left: 24px;
+    }
+    .github-fab svg {
+      display: block;
+    }
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: #3ecf8e;
+      box-shadow: none;
+    }
+    .status-pill .status-dot {
+      animation: dot-blink 1.4s ease-in-out infinite;
+    }
+    @keyframes dot-blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.35; }
+    }
+    .hero {
+      display: grid;
+      gap: 16px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      align-items: stretch;
+      margin-bottom: 20px;
+    }
+    .hero .discovery-card {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .hero .stat-grid {
+      grid-template-columns: repeat(4, 1fr);
+    }
+    .hero .stat {
+      padding: 14px 10px;
+    }
+    .hero .stat .v {
+      font-size: 26px;
+    }
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--panel-border);
+      border-radius: var(--radius);
+      box-shadow: none;
+      transition: border-color 180ms ease;
+    }
+    .card:hover {
+      border-color: var(--panel-border-strong);
+      box-shadow: none;
+    }
+    .card.pad { padding: 20px; }
+    .console-layout {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      align-items: start;
+    }
+    .console-left {
+      display: grid;
+      gap: 12px;
+      min-width: 0;
+    }
+    .console-left h1 {
+      margin: 0 0 2px 0;
+      font-size: 24px;
+      letter-spacing: 0.02em;
+      color: var(--text);
+    }
+    .console-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      align-items: stretch;
+      min-width: 148px;
+    }
+    .console-actions .pill,
+    .console-actions button {
+      width: 100%;
+      justify-content: center;
+      text-align: center;
+      white-space: nowrap;
+    }
+    .title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 14px;
+    }
+    .title h1, .title h2 {
+      margin: 0;
+      font-size: 18px;
+      letter-spacing: 0.02em;
+    }
+    .title h1 {
+      font-size: 24px;
+      color: var(--text);
+    }
+    .title.center {
+      justify-content: center;
+      text-align: center;
+    }
+    .title.center > div {
+      flex: 1;
+    }
+    .title.center h2 {
+      text-align: center;
+      width: 100%;
+    }
+    .sub {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+    .searchbar {
+      display: block;
+      margin-top: 0;
+    }
+    .searchbar input {
+      width: 100%;
+    }
+    input[type="url"], input[type="text"] {
+      width: 100%;
+      padding: 14px 16px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--panel-border);
+      background: var(--panel-2);
+      color: var(--text);
+      outline: none;
+      font-size: 14px;
+      box-shadow: none;
+    }
+    input::placeholder { color: var(--muted); }
+    input:focus {
+      border-color: var(--panel-border-strong);
+      box-shadow: none;
+    }
+    button {
+      border: 0;
+      border-radius: var(--radius-sm);
+      padding: 14px 18px;
+      color: var(--accent-ink);
+      font-weight: 600;
+      cursor: pointer;
+      background: var(--accent-strong);
+      box-shadow: none;
+      transition: background 180ms ease, filter 180ms ease;
+      position: relative;
+      overflow: hidden;
+    }
+    button::after {
+      display: none;
+    }
+    button:hover {
+      filter: brightness(1.08);
+      box-shadow: none;
+    }
+    button:hover::after {
+      display: none;
+    }
+    button:disabled {
+      opacity: 0.65;
+      cursor: wait;
+    }
+    #runBtn {
+      background: linear-gradient(180deg, #52b4f4 0%, #2f8fd6 100%);
+      color: #ffffff;
+      border: 1px solid rgba(110, 188, 255, 0.5);
+      box-shadow: 0 1px 0 rgba(255, 255, 255, 0.14) inset;
+    }
+    #runBtn:hover {
+      filter: brightness(1.06);
+    }
+    #runBtn:disabled {
+      opacity: 0.6;
+      filter: saturate(0.7);
+    }
+    button.autopwn-btn {
+      background: var(--danger);
+      color: #fff;
+    }
+    button.autopwn-btn:hover {
+      filter: brightness(1.1);
+    }
+    button.autopwn-btn:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+    .severity-critical { color: #e85d5d; }
+    .severity-high { color: #e89a5d; }
+    .severity-medium { color: var(--gold); }
+    .severity-low { color: var(--steel); }
+    .severity-info { color: var(--muted); }
+    .severity-badge,
+    .status-badge {
+      display: inline-block;
+      white-space: nowrap;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+    }
+    #findingsTable th:first-child,
+    #findingsTable td:first-child,
+    #coverageTable th:first-child,
+    #coverageTable td:first-child {
+      white-space: nowrap;
+      width: 1%;
+    }
+    #findingsTable table {
+      min-width: 980px;
+    }
+    #findingsTable th:nth-child(5),
+    #findingsTable td:nth-child(5) {
+      white-space: nowrap;
+      width: 1%;
+      min-width: 160px;
+    }
+    .payload-code {
+      display: inline-block;
+      max-width: 320px;
+      overflow-x: auto;
+      white-space: nowrap;
+      font-family: Consolas, "SFMono-Regular", ui-monospace, monospace;
+      font-size: 12px;
+      color: var(--text);
+      background: var(--panel);
+      border: 1px solid var(--panel-border);
+      border-radius: 4px;
+      padding: 4px 8px;
+      vertical-align: top;
+    }
+    #findingsTable td.evidence-cell {
+      min-width: 320px;
+      max-width: 560px;
+      color: var(--text);
+      white-space: normal;
+    }
+    .evidence-panel {
+      display: grid;
+      gap: 8px;
+    }
+    .evidence-meta,
+    .evidence-block {
+      margin: 0;
+      padding: 8px 10px;
+      background: var(--panel);
+      border: 1px solid var(--panel-border);
+      border-radius: 6px;
+      font-size: 12px;
+      white-space: pre-wrap;
+      word-break: break-word;
+      color: var(--text);
+    }
+    .evidence-meta {
+      font-size: 11px;
+      color: var(--muted);
+    }
+    .evidence-block {
+      max-height: 220px;
+      overflow: auto;
+    }
+    .evidence-table-wrap {
+      overflow: auto;
+      border: 1px solid var(--panel-border);
+      border-radius: 6px;
+      background: var(--panel);
+    }
+    .evidence-table {
+      width: 100%;
+      min-width: 240px;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+    .evidence-table th,
+    .evidence-table td {
+      padding: 7px 10px;
+      border-bottom: 1px solid var(--panel-border);
+      text-align: left;
+      vertical-align: top;
+      white-space: pre-wrap;
+      color: var(--text);
+    }
+    .evidence-table th {
+      background: var(--panel-2);
+      font-weight: 600;
+    }
+    .status-clean { color: var(--steel); }
+    .status-vulnerable { color: #e85d5d; font-weight: 600; }
+    .status-timeout { color: var(--gold); font-weight: 600; }
+    .status-error { color: #e85d5d; font-weight: 600; }
+    .findings-card { display: none; }
+    .findings-card.visible { display: block; }
+    .findings-body {
+      display: grid;
+      gap: 18px;
+      margin-top: 6px;
+    }
+    .findings-block h3 {
+      margin: 0 0 10px 4px;
+      font-size: 15px;
+      letter-spacing: 0.04em;
+      color: var(--text);
+    }
+    .findings-empty {
+      margin: 0;
+      padding: 14px 16px;
+      color: var(--muted);
+      border: 1px solid var(--panel-border);
+      border-radius: var(--radius-sm);
+      background: var(--panel-2);
+    }
+    .findings-block .table-wrap {
+      margin-top: 0;
+    }
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+    }
+    .stat {
+      padding: 16px;
+      border-radius: var(--radius-sm);
+      background: var(--panel-2);
+      border: 1px solid var(--panel-border);
+      position: relative;
+      overflow: hidden;
+    }
+    .stat::before {
+      content: "";
+      position: absolute;
+      inset: 0 auto auto 0;
+      width: 100%;
+      height: 1px;
+      background: var(--panel-border-strong);
+    }
+    .stat .k {
+      color: var(--muted);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      text-align: center;
+    }
+    .stat .v {
+      font-size: 30px;
+      margin-top: 8px;
+      font-weight: 800;
+      text-align: center;
+      width: 100%;
+      font-variant-numeric: tabular-nums;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+    .panel {
+      padding: 18px;
+      min-height: 260px;
+    }
+    .panel h3 {
+      margin: 0 0 12px 0;
+      font-size: 14px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      text-align: center;
+    }
+    .table-wrap {
+      overflow: auto;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--panel-border);
+      background: var(--panel-2);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 380px;
+    }
+    th, td {
+      padding: 11px 14px;
+      text-align: left;
+      border-bottom: 1px solid var(--panel-border);
+      vertical-align: top;
+      font-size: 13px;
+    }
+    th {
+      color: var(--text);
+      background: var(--panel);
+      position: sticky;
+      top: 0;
+      z-index: 1;
+      font-weight: 600;
+    }
+    td {
+      color: var(--muted);
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    tr:hover td {
+      background: rgba(148, 155, 164, 0.06);
+      color: var(--text);
+    }
+    .status-line {
+      margin-top: 14px;
+      min-height: 28px;
+      text-align: center;
+      color: var(--muted);
+      font-family: Consolas, "SFMono-Regular", ui-monospace, monospace;
+      white-space: pre-wrap;
+      line-height: 1.45;
+      font-size: 13px;
+    }
+    .status-line.ok { color: #6fa88a; }
+    .status-line.error { color: var(--danger); }
+    .status-line.working { color: var(--accent-strong); }
+    .autopwn-progress {
+      margin-top: 10px;
+      min-height: 24px;
+      text-align: center;
+      color: var(--accent-strong);
+      font-family: Consolas, "SFMono-Regular", ui-monospace, monospace;
+      white-space: pre-wrap;
+      line-height: 1.45;
+      font-size: 13px;
+    }
+    .autopwn-progress.ok { color: #6fa88a; }
+    .autopwn-progress.error { color: var(--danger); }
+    .autopwn-percent-wrap {
+      margin: 14px auto 0;
+      max-width: 520px;
+    }
+    .autopwn-percent-meta {
+      display: grid;
+      grid-template-columns: 56px minmax(0, 1fr) 88px;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+      font-family: Consolas, "SFMono-Regular", ui-monospace, monospace;
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .autopwn-percent-label {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--accent-strong);
+      text-align: left;
+    }
+    .autopwn-percent-task {
+      min-width: 0;
+      text-align: center;
+      font-size: 11px;
+      color: var(--accent-strong);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .autopwn-percent-count {
+      text-align: right;
+      white-space: nowrap;
+    }
+    .autopwn-percent-track {
+      height: 8px;
+      border-radius: 999px;
+      background: var(--panel-2);
+      border: 1px solid var(--panel-border);
+      overflow: hidden;
+    }
+    .autopwn-percent-fill {
+      height: 100%;
+      width: 0%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--accent), var(--accent-strong));
+      transition: width 280ms ease;
+    }
+    .autopwn-percent-fill.complete {
+      background: linear-gradient(90deg, #6fa88a, #4f9b74);
+    }
+    .findings-summary {
+      margin-top: 8px;
+      text-align: center;
+      color: var(--muted);
+      font-family: Consolas, "SFMono-Regular", ui-monospace, monospace;
+      font-size: 12px;
+      line-height: 1.45;
+    }
+    .response-card {
+      margin-top: 16px;
+      display: none;
+    }
+    .response-card.visible {
+      display: block;
+    }
+    .response-output {
+      margin: 0;
+      min-height: 120px;
+      padding: 16px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--panel-border);
+      background: var(--panel-2);
+      color: var(--text);
+      font-family: Consolas, "SFMono-Regular", ui-monospace, monospace;
+      white-space: pre-wrap;
+      word-break: break-word;
+      line-height: 1.5;
+      font-size: 13px;
+    }
+    .action-btn {
+      border: 1px solid var(--panel-border-strong);
+      border-radius: 6px;
+      padding: 7px 14px;
+      min-width: 58px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      white-space: nowrap;
+      color: var(--accent-ink);
+      background: var(--accent-strong);
+      box-shadow: none;
+      cursor: pointer;
+      display: inline-block;
+      line-height: 1.2;
+    }
+    td:has(.action-btn) {
+      white-space: nowrap;
+      width: 1%;
+      vertical-align: middle;
+    }
+    .action-btn:hover {
+      filter: brightness(1.08);
+      box-shadow: none;
+    }
+    .action-btn::after { display: none; }
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(3, 6, 10, 0.72);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 20;
+      padding: 20px;
+    }
+    .modal-backdrop.open { display: flex; }
+    .modal {
+      width: min(520px, 100%);
+      border-radius: var(--radius);
+      border: 1px solid var(--panel-border);
+      background: var(--panel);
+      box-shadow: var(--shadow);
+      padding: 18px;
+    }
+    .modal h3 {
+      margin: 0 0 8px 0;
+      font-size: 16px;
+    }
+    .modal p {
+      margin: 0 0 14px 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+    .field {
+      display: grid;
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+    .field label {
+      font-size: 12px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 16px;
+    }
+    .ghost-btn {
+      border: 1px solid var(--panel-border);
+      border-radius: 10px;
+      padding: 10px 14px;
+      background: transparent;
+      color: var(--text);
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: none;
+    }
+    .ghost-btn::after { display: none; }
+    .ghost-btn:hover {
+      border-color: var(--panel-border-strong);
+      box-shadow: none;
+      filter: none;
+    }
+    .muted {
+      color: var(--muted);
+    }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 12px;
+      border-radius: 999px;
+      background: var(--panel-2);
+      color: var(--muted);
+      font-size: 12px;
+      border: 1px solid var(--panel-border);
+      box-shadow: none;
+    }
+    [data-theme="light"] .card,
+    [data-theme="light"] .topbar,
+    [data-theme="light"] .table-wrap,
+    [data-theme="light"] .console,
+    [data-theme="light"] .stat {
+      background: linear-gradient(180deg, var(--panel), var(--panel-2));
+      border-color: var(--panel-border);
+    }
+    [data-theme="light"] input[type="url"],
+    [data-theme="light"] input[type="text"] {
+      background: linear-gradient(180deg, rgba(255,255,255,0.96), rgba(246,248,251,0.98));
+      color: #16222d;
+      border-color: rgba(64, 78, 92, 0.16);
+    }
+    [data-theme="light"] input::placeholder {
+      color: #6b7785;
+    }
+    [data-theme="light"] .status-line {
+      color: #4b5d6d;
+    }
+    [data-theme="light"] .response-output {
+      background: rgba(250, 252, 254, 0.92);
+      color: #273544;
+      border-color: rgba(64, 78, 92, 0.10);
+    }
+    [data-theme="light"] .modal {
+      background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(246,248,251,0.98));
+    }
+    [data-theme="light"] .table-wrap {
+      background: rgba(250, 252, 254, 0.92);
+    }
+    [data-theme="light"] th {
+      color: #2a3746;
+      background: rgba(245, 248, 251, 0.98);
+      border-bottom-color: rgba(64, 78, 92, 0.10);
+    }
+    [data-theme="light"] td {
+      color: #273544;
+      border-bottom-color: rgba(64, 78, 92, 0.08);
+    }
+    [data-theme="light"] tr:hover td {
+      background: rgba(76, 147, 206, 0.06);
+    }
+    [data-theme="light"] .icon-link,
+    [data-theme="light"] .icon-btn,
+    [data-theme="light"] .corner-fab {
+      background: linear-gradient(180deg, rgba(255,255,255,0.96), rgba(244,247,250,0.98));
+      color: #1d2a35;
+      border-color: rgba(64, 78, 92, 0.12);
+    }
+    [data-theme="light"] .pill {
+      background: rgba(76, 147, 206, 0.10);
+      color: #24323f;
+      border-color: rgba(76, 147, 206, 0.14);
+    }
+    [data-theme="light"] .status-dot {
+      background: #2a8f61;
+      box-shadow: none;
+    }
+    [data-theme="light"] .status-pill .status-dot {
+      animation: dot-blink 1.4s ease-in-out infinite;
+    }
+    @media (max-width: 1100px) {
+      .grid { grid-template-columns: 1fr 1fr; }
+      .hero { grid-template-columns: 1fr; }
+      .hero .stat-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 780px) {
+      .grid, .stat-grid { grid-template-columns: 1fr; }
+      .hero .stat-grid { grid-template-columns: 1fr; }
+      .console-layout { grid-template-columns: 1fr; }
+      .console-actions {
+        flex-direction: row;
+        min-width: 0;
+      }
+      .console-actions .pill,
+      .console-actions button {
+        flex: 1;
+      }
+      .wrap { padding: 16px; }
+      .topbar {
+        padding: 6px 14px;
+      }
+      .brand {
+        height: 40px;
+      }
+      .topbar-credit {
+        font-size: 11px;
+      }
+      .brand-mark {
+        width: 170px;
+        height: 40px;
+        transform: scale(1.9);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="topbar">
+      <div class="brand">
+        <img class="brand-mark" src="/logo.png?v=3" alt="MCP Phantom" />
+      </div>
+      <div class="topbar-credit">
+        Made by <a href="https://dragkob.com" target="_blank" rel="noreferrer noopener">Dragkob</a>
+      </div>
+    </header>
+    <div class="hero">
+      <section class="card pad">
+        <div class="console-layout">
+          <div class="console-left">
+            <h1>MCP Audit Console</h1>
+            <div class="searchbar">
+              <input id="url" type="url" placeholder="https://mcp.example.local/mcp" spellcheck="false" />
+            </div>
+            <div class="status-line" id="rawOutput"></div>
+          </div>
+          <div class="console-actions">
+            <div class="pill status-pill"><span class="status-dot"></span><span>127.0.0.1:1337</span></div>
+            <button id="runBtn" onclick="runRecon()">Start Recon</button>
+            <button id="autopwnBtn" class="autopwn-btn" onclick="runAutoPwn()" disabled>AutoPwn</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="card pad discovery-card">
+        <div class="title center">
+          <div>
+            <h2>Discovery Status</h2>
+          </div>
+        </div>
+        <div class="stat-grid">
+          <div class="stat"><div class="k">Resources</div><div class="v" id="countResources">0</div></div>
+          <div class="stat"><div class="k">Templates</div><div class="v" id="countTemplates">0</div></div>
+          <div class="stat"><div class="k">Tools</div><div class="v" id="countTools">0</div></div>
+          <div class="stat"><div class="k">Prompts</div><div class="v" id="countPrompts">0</div></div>
+        </div>
+      </section>
+    </div>
+
+    <div class="grid">
+      <section class="card panel">
+        <h3>Resources</h3>
+        <div class="table-wrap" id="resourcesTable"></div>
+      </section>
+      <section class="card panel">
+        <h3>Resource Templates</h3>
+        <div class="table-wrap" id="templatesTable"></div>
+      </section>
+      <section class="card panel">
+        <h3>Tools</h3>
+        <div class="table-wrap" id="toolsTable"></div>
+      </section>
+      <section class="card panel">
+        <h3>Prompts</h3>
+        <div class="table-wrap" id="promptsTable"></div>
+      </section>
+    </div>
+
+    <section class="card pad response-card findings-card" id="findingsCard">
+      <div class="title center">
+        <div>
+          <h2>AutoPwn Findings</h2>
+        </div>
+      </div>
+      <div id="autopwnPercentWrap" class="autopwn-percent-wrap" hidden>
+        <div class="autopwn-percent-meta">
+          <span id="autopwnPercentLabel" class="autopwn-percent-label">0%</span>
+          <span id="autopwnPercentTask" class="autopwn-percent-task">Preparing...</span>
+          <span id="autopwnPercentCount" class="autopwn-percent-count">0 / 0 checks</span>
+        </div>
+        <div class="autopwn-percent-track">
+          <div id="autopwnPercentFill" class="autopwn-percent-fill"></div>
+        </div>
+      </div>
+      <div id="autopwnProgress" class="autopwn-progress"></div>
+      <div id="findingsSummary" class="findings-summary"></div>
+      <div class="findings-body">
+        <div class="findings-block">
+          <h3>Scan Coverage</h3>
+          <div id="coverageEmpty" class="findings-empty" hidden>No targeted checks were scheduled.</div>
+          <div class="table-wrap" id="coverageTable"></div>
+        </div>
+        <div class="findings-block">
+          <h3>Vulnerabilities</h3>
+          <div id="findingsEmpty" class="findings-empty" hidden>No vulnerabilities detected in targeted checks.</div>
+          <div class="table-wrap" id="findingsTable"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card pad response-card" id="actionResultCard">
+      <div class="title center">
+        <div>
+          <h2>Action Result</h2>
+        </div>
+      </div>
+      <pre class="response-output" id="actionOutput"></pre>
+    </section>
+  </div>
+
+  <a class="corner-fab github-fab" href="https://github.com/Dragkob/MCPhantom" target="_blank" rel="noreferrer noopener" aria-label="GitHub">
+    <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+      <path fill="currentColor" d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.303 24 12 24 5.373 18.627 0 12 0z"/>
+    </svg>
+  </a>
+  <button class="corner-fab theme-fab" id="themeBtn" onclick="toggleTheme()" aria-label="Toggle theme">&#9790;</button>
+
+  <div class="modal-backdrop" id="modalBackdrop" onclick="closeModal(event)">
+    <div class="modal" onclick="event.stopPropagation()">
+      <h3 id="modalTitle">Action</h3>
+      <p id="modalDescription"></p>
+      <form id="modalForm" onsubmit="event.preventDefault(); submitModal();"></form>
+      <div class="modal-actions">
+        <button type="button" class="ghost-btn" onclick="closeModal()">Cancel</button>
+        <button type="button" id="modalSubmit" onclick="submitModal()">Run</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentUrl = "";
+    let discovered = { resources: [], templates: [], tools: [], prompts: [] };
+    let pendingAction = null;
+    let autopwnState = {
+      plan: {},
+      coverage: [],
+      findings: [],
+      summary: {},
+      raw: "",
+      complete: false,
+      progressMessage: "",
+      executed: 0,
+      total: 0,
+    };
+
+    function esc(value) {
+      return String(value ?? "-")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;");
+    }
+
+    function applyTheme(theme) {
+      document.documentElement.dataset.theme = theme;
+      localStorage.setItem("mcp-audit-theme", theme);
+      document.getElementById("themeBtn").innerHTML = theme === "light" ? "&#9728;" : "&#9790;";
+    }
+
+    function toggleTheme() {
+      const current = document.documentElement.dataset.theme || "light";
+      applyTheme(current === "dark" ? "light" : "dark");
+    }
+
+    function setStatus(text, tone = "") {
+      const raw = document.getElementById("rawOutput");
+      raw.textContent = text;
+      raw.className = "status-line" + (tone ? ` ${tone}` : "");
+    }
+
+    function setAutopwnProgress(text, tone = "working") {
+      const el = document.getElementById("autopwnProgress");
+      el.textContent = text || "";
+      el.className = "autopwn-progress" + (tone ? ` ${tone}` : "");
+    }
+
+    function formatAutopwnTask(message) {
+      if (!message) {
+        return "Preparing...";
+      }
+
+      const finished = message.match(/Finished\s+(.+?)\s+\((.+?)\)\s+\[\d+\/\d+\]/i);
+      if (finished) {
+        return `${finished[1]} · ${finished[2]}`;
+      }
+
+      if (/starting/i.test(message)) {
+        return "Starting...";
+      }
+
+      if (/running checks/i.test(message)) {
+        return "Running checks...";
+      }
+
+      return message
+        .replace(/\s+\[\d+\/\d+\]\s*$/i, "")
+        .replace(/^Finished\s+/i, "")
+        .trim();
+    }
+
+    function updateAutopwnPercent(executed, total, complete = false, task = "") {
+      const wrap = document.getElementById("autopwnPercentWrap");
+      const label = document.getElementById("autopwnPercentLabel");
+      const taskEl = document.getElementById("autopwnPercentTask");
+      const count = document.getElementById("autopwnPercentCount");
+      const fill = document.getElementById("autopwnPercentFill");
+      const safeTotal = Number(total) || 0;
+      const safeExecuted = Number(executed) || 0;
+
+      if (!safeTotal && !complete) {
+        wrap.hidden = true;
+        return;
+      }
+
+      wrap.hidden = false;
+      const pct = complete
+        ? 100
+        : Math.min(100, Math.round((safeExecuted / safeTotal) * 100));
+      label.textContent = `${pct}%`;
+      taskEl.textContent = complete
+        ? "Complete"
+        : formatAutopwnTask(task || autopwnState.progressMessage);
+      count.textContent = complete
+        ? `${safeTotal} / ${safeTotal} checks`
+        : `${safeExecuted} / ${safeTotal} checks`;
+      fill.style.width = `${pct}%`;
+      fill.classList.toggle("complete", complete);
+    }
+
+    function setCounts(summary = {}) {
+      document.getElementById("countResources").textContent = summary.resources ?? 0;
+      document.getElementById("countTemplates").textContent = summary.templates ?? 0;
+      document.getElementById("countTools").textContent = summary.tools ?? 0;
+      document.getElementById("countPrompts").textContent = summary.prompts ?? 0;
+    }
+
+    function setAutoPwnEnabled(enabled) {
+      document.getElementById("autopwnBtn").disabled = !enabled;
+    }
+
+    function clearFindings() {
+      const panel = document.getElementById("findingsCard");
+      panel.classList.remove("visible");
+      setAutopwnProgress("");
+      updateAutopwnPercent(0, 0);
+      document.getElementById("autopwnPercentWrap").hidden = true;
+      document.getElementById("findingsSummary").textContent = "";
+      document.getElementById("coverageEmpty").hidden = true;
+      document.getElementById("findingsEmpty").hidden = true;
+      document.getElementById("coverageTable").innerHTML = "";
+      document.getElementById("findingsTable").innerHTML = "";
+    }
+
+    function severityClass(severity) {
+      return `severity-${String(severity || "info").toLowerCase()}`;
+    }
+
+    function evidenceTableFromLines(lines) {
+      const rows = lines.map(line => line.split("|").map(cell => cell.trim()));
+      if (rows.length < 2 || rows[0].length < 2) {
+        return `<pre class="evidence-block">${esc(lines.join("\n"))}</pre>`;
+      }
+
+      const header = rows[0];
+      const body = rows.slice(1);
+      return `<div class="evidence-table-wrap"><table class="evidence-table"><thead><tr>${header.map(cell => `<th>${esc(cell)}</th>`).join("")}</tr></thead><tbody>${body.map(row => `<tr>${row.map(cell => `<td>${esc(cell)}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`;
+    }
+
+    function formatEvidence(text) {
+      const raw = String(text ?? "-");
+      const tableMarker = "Table view:\n";
+      const rawMarker = "Raw response:\n";
+      const tableIdx = raw.indexOf(tableMarker);
+      const rawIdx = raw.indexOf(rawMarker);
+
+      let html = '<div class="evidence-panel">';
+
+      if (rawIdx !== -1) {
+        const meta = raw.slice(0, rawIdx).trim();
+        const bodyEnd = tableIdx !== -1 ? tableIdx : raw.length;
+        const body = raw.slice(rawIdx + rawMarker.length, bodyEnd).trim();
+
+        if (meta) {
+          html += `<pre class="evidence-meta">${esc(meta)}</pre>`;
+        }
+        if (body) {
+          html += `<pre class="evidence-block">${esc(body)}</pre>`;
+        }
+      } else if (tableIdx === -1) {
+        html += `<pre class="evidence-block">${esc(raw)}</pre>`;
+      }
+
+      if (tableIdx !== -1) {
+        const tableText = raw.slice(tableIdx + tableMarker.length).trim();
+        const lines = tableText.split("\n").map(line => line.trim()).filter(Boolean);
+        html += evidenceTableFromLines(lines);
+      }
+
+      html += "</div>";
+      return html;
+    }
+
+    function liveFindingsSummary() {
+      const summary = { critical: 0, high: 0, medium: 0, low: 0, info: 0 };
+      for (const item of autopwnState.findings) {
+        const key = String(item.severity || "info").toLowerCase();
+        if (key in summary) {
+          summary[key] += 1;
+        }
+      }
+      return summary;
+    }
+
+    function initFindingsStream() {
+      autopwnState = {
+        plan: {},
+        coverage: [],
+        findings: [],
+        summary: {},
+        raw: "",
+        complete: false,
+        progressMessage: "",
+        executed: 0,
+        total: 0,
+      };
+      clearFindings();
+      const panel = document.getElementById("findingsCard");
+      panel.classList.add("visible");
+      setAutopwnProgress("");
+      updateAutopwnPercent(0, 0, false, "Starting...");
+      document.getElementById("findingsSummary").textContent = "";
+      document.getElementById("coverageEmpty").hidden = false;
+      document.getElementById("coverageEmpty").textContent = "Waiting for first check...";
+      document.getElementById("findingsEmpty").hidden = false;
+      document.getElementById("findingsEmpty").textContent = "Waiting for findings...";
+      requestAnimationFrame(() => {
+        panel.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+    }
+
+    function renderFindingsSummary(data) {
+      const plan = data.plan || {};
+      const summary = data.summary || {};
+      document.getElementById("findingsSummary").textContent =
+        `Plan: ${plan.targets || 0} checks (${plan.tests || 0} max payloads). ` +
+        `Severity: ${summary.critical || 0} critical, ${summary.high || 0} high, ${summary.medium || 0} medium.`;
+    }
+
+    function renderFindingsLive() {
+      const plan = autopwnState.plan || {};
+      const progress = autopwnState.coverage.length;
+      const total = autopwnState.total || plan.targets || 0;
+      const executed = Math.max(autopwnState.executed, progress);
+      const summary = autopwnState.complete ? autopwnState.summary : liveFindingsSummary();
+
+      updateAutopwnPercent(executed, total, autopwnState.complete);
+
+      if (autopwnState.complete) {
+        setAutopwnProgress(autopwnState.raw || "AutoPwn complete.", "ok");
+      } else {
+        setAutopwnProgress("");
+      }
+
+      renderFindings({
+        plan,
+        coverage: autopwnState.coverage,
+        findings: autopwnState.findings,
+        summary,
+        scrollIntoView: autopwnState.complete,
+      });
+    }
+
+    function handleAutopwnEvent(event) {
+      if (!event || !event.event) {
+        return;
+      }
+
+      switch (event.event) {
+        case "start":
+          autopwnState.plan = event.plan || {};
+          autopwnState.total = event.plan?.targets || 0;
+          autopwnState.executed = 0;
+          document.getElementById("coverageEmpty").textContent = "Running checks...";
+          renderFindingsLive();
+          break;
+        case "progress":
+          autopwnState.progressMessage = event.message || "Running targeted AutoPwn checks...";
+          if (event.executed != null) {
+            autopwnState.executed = event.executed;
+          }
+          if (event.total != null) {
+            autopwnState.total = event.total;
+          }
+          updateAutopwnPercent(
+            autopwnState.executed,
+            autopwnState.total || autopwnState.plan?.targets || 0,
+            false,
+            autopwnState.progressMessage
+          );
+          break;
+        case "coverage":
+          autopwnState.coverage.push(event.entry);
+          document.getElementById("coverageEmpty").hidden = true;
+          renderFindingsLive();
+          break;
+        case "finding":
+          autopwnState.findings.push(event.finding);
+          document.getElementById("findingsEmpty").hidden = true;
+          renderFindingsLive();
+          break;
+        case "done":
+          autopwnState.plan = event.plan || autopwnState.plan;
+          autopwnState.coverage = event.coverage || autopwnState.coverage;
+          autopwnState.findings = event.findings || autopwnState.findings;
+          autopwnState.summary = event.summary || {};
+          autopwnState.raw = event.raw || "AutoPwn complete.";
+          autopwnState.complete = true;
+          renderFindingsLive();
+          break;
+        case "error":
+          setAutopwnProgress(`AutoPwn failed: ${event.error || "Unknown error"}`, "error");
+          break;
+        default:
+          break;
+      }
+    }
+
+    function coverageStatusClass(status) {
+      if (status === "vulnerable") return "status-vulnerable";
+      if (status === "timeout") return "status-timeout";
+      if (status === "error") return "status-error";
+      return "status-clean";
+    }
+
+    function renderFindings(data) {
+      const panel = document.getElementById("findingsCard");
+      const findings = data.findings || [];
+      const coverage = (data.coverage && data.coverage.length)
+        ? data.coverage
+        : (data.plan?.entries || []).map(entry => ({
+            capability: entry.capability,
+            type: entry.type,
+            plugin: entry.plugin,
+            parameters: [],
+            status: "planned",
+            findings: 0,
+          }));
+      const plan = data.plan || {};
+      const summary = data.summary || {};
+
+      renderFindingsSummary(data);
+
+      const coverageTable = document.getElementById("coverageTable");
+      const coverageEmpty = document.getElementById("coverageEmpty");
+      if (!coverage.length) {
+        coverageEmpty.hidden = false;
+        coverageTable.innerHTML = "";
+      } else {
+        coverageEmpty.hidden = true;
+        coverageTable.innerHTML = tableHTML(
+          ["Status", "Capability", "Type", "Plugin", "Parameters", "Hits", "Note"],
+          coverage.map(item => [
+            `<span class="status-badge ${coverageStatusClass(item.status)}">${esc(item.status)}</span>`,
+            item.capability,
+            item.type,
+            item.plugin,
+            (item.parameters || []).join(", ") || "-",
+            String(item.findings ?? 0),
+            item.error ? `<span class="status-error" title="${esc(item.error)}">${esc(item.error)}</span>` : "-",
+          ]),
+          true
+        );
+      }
+
+      const findingsTable = document.getElementById("findingsTable");
+      const findingsEmpty = document.getElementById("findingsEmpty");
+      if (!findings.length) {
+        findingsEmpty.hidden = false;
+        findingsTable.innerHTML = "";
+      } else {
+        findingsEmpty.hidden = true;
+        findingsTable.innerHTML = tableHTML(
+          ["Severity", "Title", "Plugin", "Capability", "Payload", "Evidence"],
+          findings.map(item => [
+            `<span class="severity-badge ${severityClass(item.severity)}">${esc(item.severity)}</span>`,
+            item.title,
+            item.plugin,
+            `${item.capability} (${item.type})`,
+            `<span class="payload-code">${esc(item.payload)}</span>`,
+            `<div class="evidence-cell">${formatEvidence(item.evidence)}</div>`,
+          ]),
+          true
+        );
+      }
+
+      panel.classList.add("visible");
+      if (data.scrollIntoView) {
+        requestAnimationFrame(() => {
+          panel.scrollIntoView({ behavior: "smooth", block: "start" });
+        });
+      }
+    }
+
+    function setActionOutput(text) {
+      const panel = document.getElementById("actionResultCard");
+      document.getElementById("actionOutput").textContent = text;
+      panel.classList.add("visible");
+      requestAnimationFrame(() => {
+        panel.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+    }
+
+    function tableHTML(headers, rows, rawCells = false) {
+      const head = `<tr>${headers.map(h => `<th>${esc(h)}</th>`).join("")}</tr>`;
+      const body = rows.length
+        ? rows.map(row => `<tr>${row.map(cell => rawCells ? `<td>${cell}</td>` : `<td>${esc(cell)}</td>`).join("")}</tr>`).join("")
+        : `<tr><td colspan="${headers.length}">No items found</td></tr>`;
+      return `<table>${head}${body}</table>`;
+    }
+
+    function actionButton(label, handler) {
+      return `<button type="button" class="action-btn" onclick="${handler}">${esc(label)}</button>`;
+    }
+
+    function templatePlaceholders(template, description = "") {
+      const fromTemplate = [...String(template).matchAll(/\{([^}]+)\}/g)].map(match => match[1].trim());
+      if (fromTemplate.length) {
+        return [...new Set(fromTemplate.filter(Boolean))];
+      }
+
+      const kwSection = String(description).match(/keyword arguments?:\s*([^.!\n]+)/i);
+      if (kwSection) {
+        const fromDescription = [...kwSection[1].matchAll(/([a-zA-Z_][\w]*)\s*--/g)].map(match => match[1]);
+        if (fromDescription.length) {
+          return [...new Set(fromDescription)];
+        }
+      }
+
+      return [];
+    }
+
+    function renderTables() {
+      document.getElementById("resourcesTable").innerHTML = tableHTML(
+        ["#", "Name", "URI", "Description", "Action"],
+        (discovered.resources || []).map((item, index) => [
+          index + 1,
+          item.name,
+          item.uri,
+          item.description,
+          actionButton("Read", `readResource(${index})`),
+        ]),
+        true
+      );
+      document.getElementById("templatesTable").innerHTML = tableHTML(
+        ["#", "Template", "Description", "Action"],
+        (discovered.templates || []).map((item, index) => [
+          index + 1,
+          item.template,
+          item.description,
+          actionButton("Read", `readTemplate(${index})`),
+        ]),
+        true
+      );
+      document.getElementById("toolsTable").innerHTML = tableHTML(
+        ["#", "Tool", "Parameters", "Description", "Action"],
+        (discovered.tools || []).map((item, index) => [
+          index + 1,
+          item.name,
+          item.parameters,
+          item.description,
+          actionButton("Run", `runTool(${index})`),
+        ]),
+        true
+      );
+      document.getElementById("promptsTable").innerHTML = tableHTML(
+        ["#", "Prompt", "Description", "Action"],
+        (discovered.prompts || []).map((item, index) => [
+          index + 1,
+          item.name,
+          item.description,
+          actionButton("Run", `runPrompt(${index})`),
+        ]),
+        true
+      );
+    }
+
+    function clearTables() {
+      discovered = { resources: [], templates: [], tools: [], prompts: [] };
+      setCounts();
+      setAutoPwnEnabled(false);
+      clearFindings();
+      ["resourcesTable", "templatesTable", "toolsTable", "promptsTable"].forEach(id => {
+        document.getElementById(id).innerHTML = "";
+      });
+    }
+
+    async function postAction(path, payload) {
+      const response = await fetch(path, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const data = await response.json();
+      if (!response.ok || !data.ok) {
+        throw new Error(data.error || "Request failed");
+      }
+      return data;
+    }
+
+    async function readResource(index) {
+      const item = discovered.resources[index];
+      if (!item || !currentUrl) return;
+
+      setActionOutput(`Reading resource: ${item.name}...`);
+      try {
+        const data = await postAction("/api/read-resource", {
+          url: currentUrl,
+          uri: item.uri,
+        });
+        setActionOutput(data.result || "-");
+      } catch (error) {
+        setActionOutput(`Error: ${error.message}`);
+      }
+    }
+
+    function readTemplate(index) {
+      const item = discovered.templates[index];
+      if (!item || !currentUrl) return;
+
+      const placeholders = templatePlaceholders(item.template, item.description);
+      if (!placeholders.length) {
+        executeTemplate(index, {});
+        return;
+      }
+
+      openModal({
+        title: `Read Template: ${item.template}`,
+        description: "Fill in the template placeholders, then read the resolved resource.",
+        fields: placeholders.map(name => ({ name, label: name, required: true })),
+        onSubmit: values => executeTemplate(index, values),
+      });
+    }
+
+    async function executeTemplate(index, values) {
+      const item = discovered.templates[index];
+      setActionOutput(`Reading template: ${item.template}...`);
+      try {
+        const data = await postAction("/api/read-template", {
+          url: currentUrl,
+          template: item.template,
+          values,
+        });
+        setActionOutput(data.result || "-");
+      } catch (error) {
+        setActionOutput(`Error: ${error.message}`);
+      }
+    }
+
+    function runTool(index) {
+      const item = discovered.tools[index];
+      if (!item || !currentUrl) return;
+
+      const schema = item.schema || { properties: {}, required: [] };
+      const properties = schema.properties || {};
+      const required = new Set(schema.required || []);
+      const fields = Object.entries(properties).map(([name, meta]) => ({
+        name,
+        label: required.has(name) ? `${name} (required)` : name,
+        required: required.has(name),
+        defaultValue: meta?.default ?? "",
+      }));
+
+      if (!fields.length) {
+        openModal({
+          title: `Run Tool: ${item.name}`,
+          description: "This tool has no schema. Enter key/value pairs manually.",
+          fields: [
+            { name: "key", label: "Key", required: true },
+            { name: "value", label: "Value", required: true },
+          ],
+          onSubmit: values => executeTool(index, { [values.key]: values.value }),
+        });
+        return;
+      }
+
+      openModal({
+        title: `Run Tool: ${item.name}`,
+        description: item.description || "Enter tool arguments.",
+        fields,
+        onSubmit: values => executeTool(index, values),
+      });
+    }
+
+    async function executeTool(index, args) {
+      const item = discovered.tools[index];
+      setActionOutput(`Running tool: ${item.name}...`);
+      try {
+        const data = await postAction("/api/call-tool", {
+          url: currentUrl,
+          name: item.name,
+          arguments: args,
+        });
+        setActionOutput(data.result || "-");
+      } catch (error) {
+        setActionOutput(`Error: ${error.message}`);
+      }
+    }
+
+    function runPrompt(index) {
+      const item = discovered.prompts[index];
+      if (!item || !currentUrl) return;
+
+      const schema = item.schema || { properties: {}, required: [] };
+      const properties = schema.properties || {};
+      const required = new Set(schema.required || []);
+      const fields = Object.entries(properties).map(([name, meta]) => ({
+        name,
+        label: required.has(name) ? `${name} (required)` : name,
+        required: required.has(name),
+        defaultValue: meta?.default ?? "",
+      }));
+
+      if (!fields.length) {
+        executePrompt(index, {});
+        return;
+      }
+
+      openModal({
+        title: `Run Prompt: ${item.name}`,
+        description: item.description || "Enter prompt arguments.",
+        fields,
+        onSubmit: values => executePrompt(index, values),
+      });
+    }
+
+    async function executePrompt(index, args) {
+      const item = discovered.prompts[index];
+      setActionOutput(`Running prompt: ${item.name}...`);
+      try {
+        const data = await postAction("/api/run-prompt", {
+          url: currentUrl,
+          name: item.name,
+          arguments: args,
+        });
+        setActionOutput(data.result || "-");
+      } catch (error) {
+        setActionOutput(`Error: ${error.message}`);
+      }
+    }
+
+    function openModal(config) {
+      pendingAction = config;
+      document.getElementById("modalTitle").textContent = config.title || "Action";
+      document.getElementById("modalDescription").textContent = config.description || "";
+      document.getElementById("modalForm").innerHTML = (config.fields || []).map(field => `
+        <div class="field">
+          <label for="field-${esc(field.name)}">${esc(field.label || field.name)}</label>
+          <input id="field-${esc(field.name)}" name="${esc(field.name)}" type="text" value="${esc(field.defaultValue || "")}" ${field.required ? "required" : ""} />
+        </div>
+      `).join("");
+      document.getElementById("modalBackdrop").classList.add("open");
+      const firstInput = document.querySelector("#modalForm input");
+      if (firstInput) {
+        requestAnimationFrame(() => firstInput.focus());
+      }
+    }
+
+    function closeModal(event) {
+      if (event && event.target !== document.getElementById("modalBackdrop")) {
+        return;
+      }
+      pendingAction = null;
+      document.getElementById("modalBackdrop").classList.remove("open");
+      document.getElementById("modalForm").innerHTML = "";
+    }
+
+    function submitModal() {
+      if (!pendingAction) return;
+
+      const values = {};
+      for (const field of pendingAction.fields || []) {
+        const input = document.getElementById(`field-${field.name}`);
+        const value = input ? input.value.trim() : "";
+        if (field.required && !value) {
+          setActionOutput(`Error: ${field.label || field.name} is required.`);
+          return;
+        }
+        if (value || field.required) {
+          values[field.name] = value;
+        }
+      }
+
+      const onSubmit = pendingAction.onSubmit;
+      closeModal();
+      onSubmit(values);
+    }
+
+    async function runRecon() {
+      const url = document.getElementById("url").value.trim();
+      const btn = document.getElementById("runBtn");
+
+      if (!url) {
+        setStatus("Please enter an MCP endpoint first.", "error");
+        return;
+      }
+
+      btn.disabled = true;
+      setAutoPwnEnabled(false);
+      clearFindings();
+      setStatus("Running recon...", "working");
+
+      try {
+        const response = await fetch("/api/recon", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ url }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok || !data.ok) {
+          currentUrl = "";
+          clearTables();
+          setStatus(`Not responding as MCP:\n${data.error || "Unknown error"}`, "error");
+          return;
+        }
+
+        currentUrl = data.url || url;
+        discovered = {
+          resources: data.resources || [],
+          templates: data.templates || [],
+          tools: data.tools || [],
+          prompts: data.prompts || [],
+        };
+
+        setCounts(data.summary || {});
+        setStatus(data.raw || "Discovery complete.", "ok");
+        renderTables();
+        setAutoPwnEnabled(true);
+      } catch (error) {
+        currentUrl = "";
+        clearTables();
+        setStatus(`Request failed:\n${error}`, "error");
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    async function runAutoPwn() {
+      const btn = document.getElementById("autopwnBtn");
+      const url = currentUrl || document.getElementById("url").value.trim();
+
+      if (!url) {
+        setStatus("Run recon first to discover the target.", "error");
+        return;
+      }
+
+      btn.disabled = true;
+      initFindingsStream();
+      setStatus("");
+
+      try {
+        const response = await fetch("/api/autopwn", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ url, stream: true }),
+        });
+
+        const contentType = response.headers.get("content-type") || "";
+        if (!contentType.includes("ndjson")) {
+          setAutopwnProgress(
+            "AutoPwn failed: server did not stream results. Restart web_server.py to load the latest code.",
+            "error"
+          );
+          return;
+        }
+
+        if (!response.ok || !response.body) {
+          setAutopwnProgress(`AutoPwn failed: HTTP ${response.status}`, "error");
+          return;
+        }
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = "";
+
+        while (true) {
+          const { value, done } = await reader.read();
+          if (done) {
+            break;
+          }
+
+          buffer += decoder.decode(value, { stream: true });
+          let newlineIndex = buffer.indexOf("\n");
+          while (newlineIndex >= 0) {
+            const line = buffer.slice(0, newlineIndex).trim();
+            buffer = buffer.slice(newlineIndex + 1);
+            if (line) {
+              handleAutopwnEvent(JSON.parse(line));
+            }
+            newlineIndex = buffer.indexOf("\n");
+          }
+        }
+
+        const tail = buffer.trim();
+        if (tail) {
+          handleAutopwnEvent(JSON.parse(tail));
+        }
+
+        if (!autopwnState.complete && autopwnState.coverage.length > 0) {
+          autopwnState.complete = true;
+          autopwnState.raw = `AutoPwn stream closed after ${autopwnState.coverage.length} check(s).`;
+          renderFindingsLive();
+        } else if (!autopwnState.complete) {
+          setAutopwnProgress("AutoPwn ended before completion.", "error");
+        }
+      } catch (error) {
+        setAutopwnProgress(`AutoPwn request failed: ${error}`, "error");
+      } finally {
+        btn.disabled = false;
+        if (currentUrl) {
+          setAutoPwnEnabled(true);
+        }
+      }
+    }
+
+    (() => {
+      document.title = "MCPhantom";
+      const saved = localStorage.getItem("mcp-audit-theme") || "light";
+      applyTheme(saved === "dark" ? "dark" : "light");
+    })();
+  </script>
+</body>
+</html>
