@@ -15,7 +15,6 @@ MCPhantom/
 ├── autopwn.py             # AutoPwn orchestrator
 ├── mcp_client.py          # MCP probe/enumeration helpers
 ├── logo.png               # Branding asset
-├── DOCUMENTATION.md       # Project docs (this file)
 └── audit/                 # Core auditing engine
     ├── discovery.py
     ├── classifier.py
