@@ -20,6 +20,9 @@ MCPhantom/
     ├── classifier.py
     ├── models.py
     ├── payloads.py
+    ├── safety.py
+    ├── template_uri.py
+    ├── mcp_logging.py
     ├── plugin_loader.py
     └── plugins/
         ├── base.py
@@ -51,17 +54,17 @@ MCPhantom/
     <tr>
       <td><code>web_server.py</code></td>
       <td>Entry point</td>
-      <td>Local HTTP server on <code>127.0.0.1:1337</code>. Serves the dashboard, handles recon, AutoPwn streaming, and manual actions (read resource, call tool, run prompt).</td>
+      <td>Local HTTP server on <code>127.0.0.1:1337</code>. Serves the dashboard, handles recon, AutoPwn streaming (NDJSON), and manual actions (read resource, call tool, run prompt). Suppresses harmless MCP SSE teardown log noise on startup.</td>
     </tr>
     <tr>
       <td><code>dashboard.html</code></td>
       <td>Web UI</td>
-      <td>Single-page frontend: target input, discovery tables, live interaction modals, AutoPwn progress bar, findings/coverage tables, theme toggle.</td>
+      <td>Single-page frontend: target input, discovery tables, live interaction modals (backdrop click does not dismiss), AutoPwn progress bar, findings/coverage tables, collapsible "not automatically tested" safety panel, theme toggle.</td>
     </tr>
     <tr>
       <td><code>autopwn.py</code></td>
       <td>AutoPwn engine</td>
-      <td>Smart scanner that classifies capabilities, picks relevant plugins/payloads, runs checks in parallel, streams NDJSON results, and deduplicates findings.</td>
+      <td>Smart scanner that classifies capabilities, picks relevant plugins/payloads, respects safe mode limits, reuses one MCP client per scan, streams NDJSON results, reports skipped surfaces, and deduplicates findings.</td>
     </tr>
     <tr>
       <td><code>mcp_client.py</code></td>
@@ -76,7 +79,7 @@ MCPhantom/
     <tr>
       <td><code>README.md</code></td>
       <td>Documentation</td>
-      <td>Project overview, important notice, features table, and quick start instructions.</td>
+      <td>Project overview, layout reference, and quick start instructions.</td>
     </tr>
   </tbody>
 </table>
@@ -99,19 +102,14 @@ MCPhantom/
   </thead>
   <tbody>
     <tr>
-      <td><code>audit/__init__.py</code></td>
-      <td>Package marker</td>
-      <td>Makes <code>audit</code> importable as a Python package.</td>
-    </tr>
-    <tr>
       <td><code>audit/discovery.py</code></td>
       <td>Discovery</td>
-      <td>Connects to an MCP server and collects resources, resource templates, tools, and prompts into a <code>CapabilityCollection</code>.</td>
+      <td>Connects to an MCP server and collects resources, resource templates, tools, and prompts into a <code>CapabilityCollection</code>. Supports sharing an existing MCP client with AutoPwn for a single connection per scan.</td>
     </tr>
     <tr>
       <td><code>audit/classifier.py</code></td>
       <td>Classifier</td>
-      <td>Tags each capability (URL, COMMAND, DATABASE, PATH, ID, etc.) so AutoPwn knows which vulnerability checks to run.</td>
+      <td>Tags each capability (URL, COMMAND, DATABASE, PATH, ID, etc.) so AutoPwn knows which vulnerability checks to run. Treats unknown template slots and description keywords as database/SQLi surfaces where appropriate.</td>
     </tr>
     <tr>
       <td><code>audit/models.py</code></td>
@@ -121,7 +119,22 @@ MCPhantom/
     <tr>
       <td><code>audit/payloads.py</code></td>
       <td>Payload store</td>
-      <td>Central repository of test payloads (SQLi, CMDi, SSRF, traversal, IDOR, infoleak). Extend this file to add more probes.</td>
+      <td>Central repository of test payloads (SQLi, CMDi, SSRF, traversal, IDOR, infoleak). Includes MySQL/MariaDB <code>#</code> comment variants, system variable probes (<code>@@version</code>, <code>@@hostname</code>, etc.), and traversal evasion payloads. Extend this file to add more probes.</td>
+    </tr>
+    <tr>
+      <td><code>audit/safety.py</code></td>
+      <td>Safe mode</td>
+      <td>Scan safety defaults (<code>SAFE_MODE = True</code>): blocks mutating tools (store/write/delete), limits SQLi to read-only probes on template slots, runs gentle sequential SQLi with early stop, and caps parallel checks. Set <code>SAFE_MODE = False</code> for full aggressive scanning on disposable lab targets.</td>
+    </tr>
+    <tr>
+      <td><code>audit/template_uri.py</code></td>
+      <td>Template URIs</td>
+      <td>Expands and substitutes values into MCP resource template placeholders (used by manual reads, SQLi, and path traversal tests).</td>
+    </tr>
+    <tr>
+      <td><code>audit/mcp_logging.py</code></td>
+      <td>MCP logging</td>
+      <td>Filters harmless <code>ClosedResourceError</code> tracebacks from the MCP HTTP/SSE client during connection teardown.</td>
     </tr>
     <tr>
       <td><code>audit/plugin_loader.py</code></td>
@@ -156,12 +169,12 @@ MCPhantom/
     <tr>
       <td><code>plugins/base.py</code></td>
       <td>All plugins</td>
-      <td>Base <code>Plugin</code> class: payload execution, MCP calls (tools/resources/templates/prompts), finding builder, and shared helpers.</td>
+      <td>Base <code>Plugin</code> class: payload execution, MCP calls (tools/resources/templates/prompts), finding builder, response text extraction, and shared helpers.</td>
     </tr>
     <tr>
       <td><code>plugins/sqli.py</code></td>
       <td>SQL injection</td>
-      <td>UNION-based probes, version/schema extraction, proof scoring, reflection filtering, and evidence formatting.</td>
+      <td>UNION-based probes, version/metadata extraction (<code>@@version</code>, <code>@@hostname</code>, <code>@@basedir</code>, etc.), proof scoring, fingerprint deduplication, reflection filtering, and evidence formatting.</td>
     </tr>
     <tr>
       <td><code>plugins/cmdi.py</code></td>
@@ -176,7 +189,7 @@ MCPhantom/
     <tr>
       <td><code>plugins/traversal.py</code></td>
       <td>Path traversal</td>
-      <td>Tests path/file parameters with <code>../</code> style escapes toward sensitive files.</td>
+      <td>Tests file-like resource templates with <code>../</code> escapes, encoding, and filter evasion. Requires passwd-style content in responses to reduce false positives. Runs only on <code>resource_template</code> surfaces.</td>
     </tr>
     <tr>
       <td><code>plugins/idor.py</code></td>
@@ -195,6 +208,32 @@ MCPhantom/
 
 <div align="center">
   
+### Safe mode (default)
+
+</div>
+
+AutoPwn runs in **safe mode** by default to protect lab targets from accidental damage:
+
+| Behavior | Safe mode | Full mode (`SAFE_MODE = False`) |
+|---|---|---|
+| Mutating tools (`store_file`, `store_password`, etc.) | Skipped | May be tested if parameters match |
+| SQLi on static `resource://` URIs | Skipped | May be tested |
+| SQLi on template slots (`password://{platform}`, etc.) | Read-only probes only | Full payload list |
+| SQLi concurrency | Sequential, 0.4s delay, stop after first hit | Parallel |
+| Parallel capability checks | Up to 2 | Up to 4 |
+
+Skipped surfaces appear in the dashboard under **Not automatically tested** (collapsed by default). Each entry explains why it was not scanned.
+
+Toggle safe mode in `audit/safety.py`:
+
+```python
+SAFE_MODE = False  # use only on throwaway lab targets
+```
+
+---
+
+<div align="center">
+  
 ### How the pieces connect
 
 </div>
@@ -206,17 +245,34 @@ flowchart LR
     API --> AP[autopwn.py]
     AP --> DISC[discovery.py]
     AP --> CLS[classifier.py]
+    AP --> SAF[safety.py]
     AP --> PL[plugin_loader.py]
     PL --> PG[plugins/*.py]
     PG --> PAY[payloads.py]
+    PG --> TPL[template_uri.py]
     PG --> BASE[base.py]
     DISC --> MOD[models.py]
+    AP --> LOG[mcp_logging.py]
 ```
 
 1. User opens `dashboard.html` via `web_server.py`.
-2. Start Recon calls `mcp_client.py` to enumerate the target.
-3. AutoPwn runs `autopwn.py`, which uses discovery + classifier + plugins + payloads.
-4. Results stream back to the UI as coverage rows and vulnerability findings.
+2. **Start Recon** calls `mcp_client.py` to enumerate the target.
+3. **AutoPwn** runs `autopwn.py`, which uses discovery, classifier, safety rules, plugins, and payloads over a shared MCP connection.
+4. Results stream back to the UI as coverage rows, vulnerability findings, and a list of deliberately skipped surfaces.
+
+---
+
+<div align="center">
+  
+### Quick start
+
+</div>
+
+```bash
+python web_server.py
+```
+
+Open [http://127.0.0.1:1337](http://127.0.0.1:1337), enter your MCP target URL, run **Start Recon**, then **AutoPwn**.
 
 ---
 
@@ -232,7 +288,8 @@ flowchart LR
 |---|---|
 | Add payloads | `audit/payloads.py` |
 | Add a new vulnerability type | New file in `audit/plugins/` + inherit from `base.Plugin` |
-| Change what gets tested | `audit/classifier.py`, `autopwn.py` |
+| Change what gets tested | `audit/classifier.py`, `audit/safety.py`, `autopwn.py` |
+| Toggle safe vs full scan | `audit/safety.py` (`SAFE_MODE`) |
 | Change UI layout or streaming | `dashboard.html` |
 | Add API endpoints | `web_server.py` |
 
