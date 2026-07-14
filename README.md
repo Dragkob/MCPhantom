@@ -128,4 +128,4 @@ python web_server.py
 ___
 
 > [!CAUTION]
-> This project is intended strictly for authorized security auditing, MCP reconnaissance research, and educational purposes. It is designed to help security professionals discover and assess exposed MCP endpoints and their capabilities. Any unauthorized use against systems, accounts, or environments without explicit permission is strictly prohibited. The author assumes no responsibility or liability for any misuse, damage, legal consequences, or unauthorized activities arising from the use of this project.
+> MCPhantom is intended **solely** for authorized security assessments, research, and educational purposes. Use it only against systems you own or have explicit permission to test. See the [LICENSE](LICENSE) file for warranty and liability terms.
